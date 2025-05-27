@@ -385,4 +385,395 @@ make dev-reset
 
 # 四半期: フルデモで動作確認
 make demo
+```
+
+---
+
+# 🏢 Dynamic Tenant Management Feature Guide
+
+## 📋 Overview
+
+In the dbt-poc project, you can dynamically create new S3 paths and databases using seed file data and tenant names by specifying the TENANT variable with make commands.
+
+## 🎯 Available Make Commands
+
+### **📖 Help & Information Display**
+- `make help` - Display help for all commands
+- `make examples` - Show usage examples
+- `make info` - Display project information
+- `make version` - Show version information
+
+### **🚀 Basic Operations**
+- `make setup` - Initial setup (Docker environment construction)
+- `make clean` - Environment cleanup
+- `make up` - Start PostgreSQL container
+- `make down` - Stop all containers
+- `make status` - Check container status
+
+### **🏷️ Tenant Management**
+- `make tenant-a` - Execute tenant A
+- `make tenant-b` - Execute tenant B
+- `make tenant-run TENANT=<name>` - Execute specified tenant
+- `make tenant-create TENANT=<name>` - Create dynamic tenant
+- `make tenant-create-and-run TENANT=<name>` - Create & execute dynamic tenant
+- `make tenant-clean` - Clean predefined tenants
+- `make tenant-clean-dynamic TENANT=<name>` - Clean dynamic tenant
+
+### **📊 Data Analysis**
+- `make analysis-basic TENANT=<name>` - Execute basic data analysis
+- `make analysis-dashboard TENANT=<name>` - Execute dashboard analysis
+- `make analysis-products TENANT=<name>` - Execute product analysis
+- `make analysis-all TENANT=<name>` - Execute all analyses
+
+### **🔧 dbt Operations**
+- `make dbt-debug TENANT=<name>` - dbt connection check
+- `make dbt-seed TENANT=<name>` - Load dbt seed data
+- `make dbt-run TENANT=<name>` - Execute dbt models
+- `make dbt-test TENANT=<name>` - Execute dbt tests
+- `make dbt-snapshot TENANT=<name>` - Execute dbt snapshots
+- `make dbt-compile TENANT=<name>` - Compile dbt
+
+### **🗄️ Database Operations**
+- `make db-connect TENANT=<name>` - Connect to PostgreSQL
+- `make db-status` - Check database status
+- `make db-list-tenants` - List tenant databases
+- `make db-tables TENANT=<name>` - List tables
+- `make db-schemas TENANT=<name>` - List schemas
+- `make db-tenant-info TENANT=<name>` - Display tenant information
+- `make db-create-schemas` - Create schemas
+
+### **🧪 Testing**
+- `make test-all` - Execute all tests
+- `make test-tenant TENANT=<name>` - Test tenant functionality
+- `make test-analysis TENANT=<name>` - Test analysis functionality
+
+### **🎯 Demo & Quick Start**
+- `make demo` - Execute full demo
+- `make quick-start` - Quick start (tenant A)
+
+### **🔧 Developer Tools**
+- `make dev-shell TENANT=<name>` - Start development shell
+- `make dev-logs` - Monitor development logs
+- `make dev-reset` - Reset development environment
+
+## 🎯 Main Features
+
+### **1. Dynamic Configuration Generation**
+- Automatically generate S3 buckets and database names from tenant names
+- Automatic support for tenants not predefined
+- Apply consistent naming conventions
+
+### **2. Automatic Database Creation**
+- Automatically create databases for specified tenants if they don't exist
+- Automatically create required schemas (public_public, staging)
+- Complete isolation in PostgreSQL environment
+
+### **3. Seed File Integration**
+- Use existing seed files (customers.csv, orders.csv, products.csv, regions.csv)
+- Automatically load into tenant-specific databases
+- Achieve complete data isolation
+
+## 🚀 Usage
+
+### **Basic Usage**
+
+```bash
+# 1. Create dynamic tenant
+make tenant-create TENANT=my_company
+
+# 2. Execute tenant (database creation + seed loading + model execution)
+make tenant-run TENANT=my_company
+
+# 3. Execute analysis
+make analysis-all TENANT=my_company
+
+# 4. Create & execute at once (recommended)
+make tenant-create-and-run TENANT=my_company
+```
+
+### **Managing Multiple Tenants**
+
+```bash
+# Create multiple tenants
+make tenant-create-and-run TENANT=acme_corp
+make tenant-create-and-run TENANT=global_inc
+make tenant-create-and-run TENANT=startup_xyz
+
+# Execute analysis for each tenant
+make analysis-all TENANT=acme_corp
+make analysis-all TENANT=global_inc
+make analysis-all TENANT=startup_xyz
+```
+
+### **Database & Table Verification**
+
+```bash
+# Check database list
+make db-status                    # All databases
+make db-list-tenants             # Tenant databases only
+
+# Check tables & schemas
+make db-tables TENANT=my_company    # Table list
+make db-schemas TENANT=my_company   # Schema list
+make db-tenant-info TENANT=my_company # Tenant information
+
+# Connect to specific tenant database
+make db-connect TENANT=my_company
+
+# Check tables in PostgreSQL
+\dt public_public.*  # Table list
+\dn                  # Schema list
+\l                   # Database list
+```
+
+## 📊 Dynamic Configuration Generation Rules
+
+### **Naming Conventions**
+
+| Item | Generation Rule | Example (TENANT=my_company) |
+|------|-----------------|----------------------------|
+| S3 Bucket | `{tenant_name}-data-lake` | `my_company-data-lake` |
+| S3 Prefix | `ecommerce-data` | `ecommerce-data` |
+| Database | `{tenant_name}_db` | `my_company_db` |
+
+### **Generated S3 Paths**
+
+```
+s3://{tenant_name}-data-lake/ecommerce-data/customers/
+s3://{tenant_name}-data-lake/ecommerce-data/orders/
+s3://{tenant_name}-data-lake/ecommerce-data/products/
+s3://{tenant_name}-data-lake/ecommerce-data/regions/
+```
+
+## 🔧 Technical Mechanisms
+
+### **1. Macro-based Dynamic Configuration**
+
+```sql
+-- macros/tenant_management.sql
+{% macro generate_dynamic_tenant_config(tenant_name) %}
+  {% set config = {
+    's3_bucket': tenant_name ~ '-data-lake',
+    's3_prefix': 'ecommerce-data',
+    'database': tenant_name ~ '_db'
+  } %}
+  {{ return(config) }}
+{% endmacro %}
+```
+
+### **2. Automatic Database Creation**
+
+```bash
+# scripts/create_dynamic_tenant.sh
+DATABASE="${TENANT_NAME}_db"
+docker-compose exec -T postgres psql -U dbt_user -d dbt_database -c "CREATE DATABASE $DATABASE;"
+```
+
+### **3. Tenant Information Embedding**
+
+```sql
+-- models/staging/stg_customers_tenant.sql
+select
+    customer_id,
+    customer_name,
+    -- Add tenant information
+    '{{ get_tenant_name() }}' as tenant_name,
+    '{{ get_tenant_s3_bucket() }}' as source_s3_bucket,
+    '{{ get_tenant_s3_prefix() }}' as source_s3_prefix
+from {{ ref('customers') }}
+```
+
+## 📈 Verifying Execution Results
+
+### **Verifying Tenant Information**
+
+```sql
+-- Check data for each tenant
+SELECT tenant_name, source_s3_bucket, source_s3_prefix, count(*) as record_count 
+FROM public_public.stg_customers_tenant 
+GROUP BY tenant_name, source_s3_bucket, source_s3_prefix;
+```
+
+### **Verifying Database List**
+
+```bash
+# Check created tenant databases
+make db-status
+# Or direct PostgreSQL command
+docker-compose exec postgres psql -U dbt_user -d dbt_database -c "\l" | grep -E "(tenant_|_db)"
+```
+
+## 🧹 Cleanup
+
+### **Individual Tenant Cleanup**
+
+```bash
+# Delete specific dynamic tenant
+make tenant-clean-dynamic TENANT=my_company
+```
+
+### **All Tenant Cleanup**
+
+```bash
+# Delete predefined tenants (tenant_a, tenant_b)
+make tenant-clean
+
+# Reset all environments
+make dev-reset
+```
+
+## ⚠️ Notes
+
+### **Tenant Name Restrictions**
+
+- Only alphanumeric characters, hyphens (-), and underscores (_) allowed
+- Maximum 50 characters
+- Complies with PostgreSQL database name restrictions
+
+### **Data Isolation**
+
+- Each tenant uses completely independent databases
+- S3 paths are also completely isolated
+- No data sharing occurs between tenants
+
+### **Resource Management**
+
+- Independent databases are created for each tenant
+- Be mindful of resource usage when creating many tenants
+- Regular cleanup of unnecessary tenants is recommended
+
+## 🎯 Best Practices
+
+### **1. Unified Naming Conventions**
+
+```bash
+# Recommended: Use company or project names
+make tenant-create-and-run TENANT=acme_corp
+make tenant-create-and-run TENANT=global_inc
+
+# Not recommended: Meaningless names
+make tenant-create-and-run TENANT=test123
+```
+
+### **2. Staged Execution**
+
+```bash
+# 1. Create only first
+make tenant-create TENANT=new_client
+
+# 2. Execute after configuration check
+make tenant-run TENANT=new_client
+
+# 3. Execute analysis
+make analysis-all TENANT=new_client
+```
+
+### **3. Regular Maintenance**
+
+```bash
+# Monthly cleanup
+make tenant-clean-dynamic TENANT=old_client
+
+# Development environment reset
+make dev-reset
+```
+
+### **4. Database & Table Verification Flow**
+
+```bash
+# 1. Overall status check
+make db-status                      # All databases
+make db-list-tenants               # Tenant databases only
+
+# 2. Specific tenant detailed check
+make db-tables TENANT=my_company    # Table list
+make db-schemas TENANT=my_company   # Schema list
+make db-tenant-info TENANT=my_company # Tenant information
+
+# 3. Connect to specific tenant (detailed check)
+make db-connect TENANT=my_company
+
+# 4. Check tables in PostgreSQL
+\dt public_public.*  # Table list
+SELECT * FROM public_public.stg_customers_tenant LIMIT 5;
+
+# 5. End connection
+\q
+```
+
+## 📚 Related Documentation
+
+- [Basic Usage](../README.md)
+- [Makefile Usage Examples](../Makefile) - `make examples`
+- [Tenant Management Macros](../macros/tenant_management.sql)
+- [Dynamic Tenant Creation Script](../scripts/create_dynamic_tenant.sh)
+
+## 🔍 Troubleshooting
+
+### **Common Issues and Solutions**
+
+1. **Database Creation Error**
+   ```bash
+   # Check PostgreSQL container status
+   make status
+   
+   # Restart container
+   make down && make up
+   ```
+
+2. **Tenant Name Error**
+   ```bash
+   # Valid tenant name example
+   make tenant-create TENANT=valid_name_123
+   
+   # Invalid tenant name (will cause error)
+   make tenant-create TENANT="invalid name!"
+   ```
+
+3. **Overwriting Existing Tenant**
+   ```bash
+   # Delete existing tenant then recreate
+   make tenant-clean-dynamic TENANT=existing_tenant
+   make tenant-create-and-run TENANT=existing_tenant
+   ```
+
+4. **Database Connection Issues**
+   ```bash
+   # dbt connection check
+   make dbt-debug TENANT=my_company
+   
+   # Direct PostgreSQL connection
+   make db-connect TENANT=my_company
+   ```
+
+## 📝 Practical Usage Examples
+
+### **New Client Setup**
+
+```bash
+# 1. Environment preparation
+make setup
+make up
+
+# 2. Create client-specific environment
+make tenant-create-and-run TENANT=new_client_2024
+
+# 3. Execute data analysis
+make analysis-all TENANT=new_client_2024
+
+# 4. Check results
+make db-connect TENANT=new_client_2024
+```
+
+### **Regular Maintenance**
+
+```bash
+# Weekly: Cleanup unnecessary tenants
+make tenant-clean-dynamic TENANT=old_test_tenant
+
+# Monthly: Reset all environments
+make dev-reset
+
+# Quarterly: Full demo for operation check
+make demo
 ``` 
