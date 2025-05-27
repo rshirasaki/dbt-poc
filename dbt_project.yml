@@ -1,0 +1,94 @@
+# dbt_project.yml
+name: 'ecommerce'
+version: '1.0.0'
+config-version: 2
+
+# プロファイル名（profiles.ymlと一致させる）
+profile: 'ecommerce'
+
+# モデルのパス
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# ビルド時の出力先
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# 変数定義
+vars:
+  # デフォルトテナント設定
+  tenant_name: tenant_a
+  
+  # 共通テーブル名（全テナント共通）
+  table_names:
+    customers: customers
+    orders: orders
+    products: products
+    regions: regions
+  
+  # テナント別設定
+  tenants:
+    tenant_a:
+      s3_bucket: tenant-a-data-lake
+      s3_prefix: ecommerce-data
+      database: tenant_a_db
+    tenant_b:
+      s3_bucket: tenant-b-data-lake
+      s3_prefix: ecommerce-data
+      database: tenant_b_db
+
+# モデル設定
+models:
+  ecommerce:
+    # ステージングモデル
+    staging:
+      +materialized: view
+      +schema: public
+    
+    # マートモデル
+    marts:
+      +materialized: table
+      +schema: public
+
+# スナップショット設定
+snapshots:
+  ecommerce:
+    +target_schema: public
+    +strategy: timestamp
+    +updated_at: updated_at
+
+# シード設定
+seeds:
+  ecommerce:
+    +schema: public
+    customers:
+      +column_types:
+        customer_id: bigint
+        customer_created_at: timestamp
+    orders:
+      +column_types:
+        order_id: bigint
+        customer_id: bigint
+        product_id: bigint
+        order_date: date
+        order_timestamp: timestamp
+        quantity: int
+        unit_price: decimal(10,2)
+        total_amount: decimal(10,2)
+    products:
+      +column_types:
+        product_id: bigint
+        product_price: decimal(10,2)
+        cost_price: decimal(10,2)
+        supplier_id: bigint
+        product_created_at: timestamp
+        is_active: boolean
+    regions:
+      +column_types:
+        region_id: bigint

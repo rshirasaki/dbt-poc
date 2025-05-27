@@ -1,0 +1,444 @@
+# 🏢 dbt-poc プロジェクト用 .gitignore
+
+# =============================================================================
+# 🔧 dbt関連ファイル
+# =============================================================================
+
+# dbt実行時に生成されるファイル
+target/
+dbt_packages/
+logs/
+.dbt/
+
+# dbtコンパイル結果
+compiled/
+run/
+
+# dbtドキュメント生成ファイル
+docs/
+site/
+
+# dbtプロファイル（機密情報を含む可能性）
+profiles.yml
+.dbt_profiles/
+
+# dbtテスト結果
+test_results/
+.dbt_test_results/
+
+# =============================================================================
+# 🐳 Docker関連ファイル
+# =============================================================================
+
+# Docker Compose オーバーライドファイル
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Docker ボリューム
+.docker/
+docker-data/
+
+# =============================================================================
+# 🗄️ データベース関連ファイル
+# =============================================================================
+
+# PostgreSQL データファイル
+postgres-data/
+pgdata/
+*.sql.backup
+*.dump
+
+# SQLite データベース
+*.db
+*.sqlite
+*.sqlite3
+
+# データベース接続設定（機密情報）
+database.yml
+db_config.yml
+
+# =============================================================================
+# 📊 データファイル
+# =============================================================================
+
+# 大容量データファイル
+*.parquet
+*.avro
+*.orc
+
+# 一時的なデータファイル
+temp_data/
+tmp_data/
+staging_data/
+
+# データエクスポート
+exports/
+downloads/
+extracts/
+
+# CSVファイル（seedファイル以外）
+data/*.csv
+!seeds/*.csv
+
+# =============================================================================
+# 🔐 機密情報・設定ファイル
+# =============================================================================
+
+# 環境変数ファイル
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.test
+
+# 設定ファイル
+config.yml
+config.json
+secrets.yml
+credentials.yml
+
+# API キー・トークン
+*.key
+*.pem
+*.p12
+*.pfx
+api_keys.txt
+tokens.txt
+
+# AWS 認証情報
+.aws/
+aws-credentials.txt
+
+# =============================================================================
+# 🐍 Python関連ファイル
+# =============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# =============================================================================
+# 💻 エディタ・IDE関連ファイル
+# =============================================================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# 🖥️ OS関連ファイル
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# 📝 ログ・一時ファイル
+# =============================================================================
+
+# ログファイル
+*.log
+logs/
+log/
+*.log.*
+
+# 一時ファイル
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+
+# キャッシュファイル
+.cache/
+cache/
+*.cache
+
+# =============================================================================
+# 🔧 ビルド・デプロイ関連ファイル
+# =============================================================================
+
+# Node.js (もしフロントエンドがある場合)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Terraform (インフラ管理がある場合)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Ansible (設定管理がある場合)
+*.retry
+
+# =============================================================================
+# 📊 分析・レポート関連ファイル
+# =============================================================================
+
+# Jupyter Notebook出力
+*.ipynb_checkpoints/
+.ipynb_checkpoints
+
+# R関連
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+
+# 分析結果
+results/
+output/
+reports/
+charts/
+plots/
+
+# =============================================================================
+# 🏢 プロジェクト固有ファイル
+# =============================================================================
+
+# テナント固有の設定ファイル
+tenant_configs/
+client_configs/
+
+# 実行結果・アーティファクト
+artifacts/
+outputs/
+generated/
+
+# テスト用データ
+test_data/
+mock_data/
+sample_data/
+
+# ドキュメント生成ファイル
+docs/generated/
+documentation/build/
+
+# =============================================================================
+# 🚫 除外しないファイル（明示的に含める）
+# =============================================================================
+
+# 重要な設定ファイルは除外しない
+!dbt_project.yml
+!packages.yml
+!seeds/*.csv
+!models/**/*.sql
+!macros/**/*.sql
+!analyses/**/*.sql
+!snapshots/**/*.sql
+!tests/**/*.sql
+!docs/*.md
+!scripts/*.sh
+!Makefile
+!docker-compose.yml
+!Dockerfile
+!requirements.txt
+!README.md
+
+# サンプル設定ファイル
+!profiles.yml.example
+!.env.example
+!config.yml.example 

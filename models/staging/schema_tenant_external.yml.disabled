@@ -1,0 +1,144 @@
+version: 2
+
+# テナント対応外部テーブル定義
+sources:
+  - name: tenant_external_tables
+    description: "テナント別S3外部テーブル（共通テーブル名、テナント別S3パス）"
+    
+    # 顧客テーブル
+    tables:
+      - name: customers
+        description: "顧客マスターデータ（全テナント共通テーブル名）"
+        external:
+          location: "s3://{{ get_tenant_s3_bucket() }}/{{ get_tenant_s3_prefix() }}/customers/"
+          file_format: parquet
+          row_format: serde 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+          table_properties: "
+            'has_encrypted_data'='false',
+            'classification'='parquet'
+          "
+        columns:
+          - name: customer_id
+            data_type: bigint
+            description: "顧客ID"
+          - name: customer_name
+            data_type: varchar(100)
+            description: "顧客名"
+          - name: customer_email
+            data_type: varchar(100)
+            description: "顧客メールアドレス"
+          - name: customer_phone
+            data_type: varchar(20)
+            description: "顧客電話番号"
+          - name: customer_address
+            data_type: varchar(200)
+            description: "顧客住所"
+          - name: customer_created_at
+            data_type: timestamp
+            description: "顧客作成日時"
+          - name: region_id
+            data_type: bigint
+            description: "地域ID"
+
+      # 注文テーブル（パーティション対応）
+      - name: orders
+        description: "注文データ（全テナント共通テーブル名、テナント別S3パス）"
+        external:
+          location: "s3://{{ get_tenant_s3_bucket() }}/{{ get_tenant_s3_prefix() }}/orders/"
+          file_format: parquet
+          row_format: serde 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+          table_properties: "
+            'has_encrypted_data'='false',
+            'classification'='parquet'
+          "
+          partitions:
+            - name: year
+              data_type: string
+              description: "年パーティション"
+            - name: month
+              data_type: string
+              description: "月パーティション"
+        columns:
+          - name: order_id
+            data_type: bigint
+            description: "注文ID"
+          - name: customer_id
+            data_type: bigint
+            description: "顧客ID"
+          - name: product_id
+            data_type: bigint
+            description: "商品ID"
+          - name: order_date
+            data_type: date
+            description: "注文日"
+          - name: order_timestamp
+            data_type: timestamp
+            description: "注文日時"
+          - name: quantity
+            data_type: int
+            description: "注文数量"
+          - name: unit_price
+            data_type: decimal(10,2)
+            description: "単価"
+          - name: total_amount
+            data_type: decimal(10,2)
+            description: "合計金額"
+
+      # 商品テーブル
+      - name: products
+        description: "商品マスターデータ（全テナント共通テーブル名）"
+        external:
+          location: "s3://{{ get_tenant_s3_bucket() }}/{{ get_tenant_s3_prefix() }}/products/"
+          file_format: parquet
+          row_format: serde 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+          table_properties: "
+            'has_encrypted_data'='false',
+            'classification'='parquet'
+          "
+        columns:
+          - name: product_id
+            data_type: bigint
+            description: "商品ID"
+          - name: product_name
+            data_type: varchar(100)
+            description: "商品名"
+          - name: product_category
+            data_type: varchar(50)
+            description: "商品カテゴリ"
+          - name: product_price
+            data_type: decimal(10,2)
+            description: "商品価格"
+          - name: cost_price
+            data_type: decimal(10,2)
+            description: "原価"
+          - name: supplier_id
+            data_type: bigint
+            description: "サプライヤーID"
+          - name: product_created_at
+            data_type: timestamp
+            description: "商品作成日時"
+          - name: is_active
+            data_type: boolean
+            description: "アクティブフラグ"
+
+      # 地域テーブル
+      - name: regions
+        description: "地域マスターデータ（全テナント共通テーブル名）"
+        external:
+          location: "s3://{{ get_tenant_s3_bucket() }}/{{ get_tenant_s3_prefix() }}/regions/"
+          file_format: parquet
+          row_format: serde 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+          table_properties: "
+            'has_encrypted_data'='false',
+            'classification'='parquet'
+          "
+        columns:
+          - name: region_id
+            data_type: bigint
+            description: "地域ID"
+          - name: region_name
+            data_type: varchar(50)
+            description: "地域名"
+          - name: country
+            data_type: varchar(50)
+            description: "国名" 

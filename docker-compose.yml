@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  dbt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my_dbt_container
+    volumes:
+      - .:/dbt_project # ホストの現在のディレクトリをマウント
+      - ./profiles.yml:/root/.dbt/profiles.yml # ホストのprofiles.ymlをマウント
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # テナント管理
+      TENANT_NAME: ${TENANT_NAME:-tenant_a}
+      # PostgreSQL接続情報
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: dbt_user
+      POSTGRES_PASSWORD: dbt_password
+      POSTGRES_DB: dbt_database
+    command: bash -c "sleep 5 && dbt debug && dbt seed && dbt run" # dbtコマンドを実行
+  postgres:
+    image: postgres:13
+    container_name: my_postgres_db
+    environment:
+      POSTGRES_USER: dbt_user
+      POSTGRES_PASSWORD: dbt_password
+      POSTGRES_DB: dbt_database
+      # テナント別データベース作成用
+      POSTGRES_MULTIPLE_DATABASES: tenant_a_db,tenant_b_db
+    ports:
+      - "5432:5432" # ホストからアクセスできるようにポートを公開
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-multiple-databases.sh:/docker-entrypoint-initdb.d/init-multiple-databases.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbt_user -d dbt_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

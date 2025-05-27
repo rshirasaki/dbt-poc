@@ -1,0 +1,57 @@
+version: 2
+
+sources:
+  - name: ecommerce
+    description: "Raw ecommerce data"
+    schema: public
+    tables:
+      - name: products
+        description: "Product catalog data"
+        columns:
+          - name: product_id
+            description: "Unique identifier for products"
+            tests:
+              - unique
+              - not_null
+          - name: product_name
+            description: "Product name"
+          - name: product_category
+            description: "Product category"
+          - name: product_price
+            description: "Product price"
+          - name: product_created_at
+            description: "Product creation timestamp"
+
+      - name: orders
+        description: "Order transaction data"
+        columns:
+          - name: order_id
+            description: "Unique identifier for orders"
+            tests:
+              - unique
+              - not_null
+          - name: customer_id
+            description: "Customer identifier"
+          - name: product_id
+            description: "Product identifier"
+          - name: order_date
+            description: "Order date"
+          - name: quantity
+            description: "Quantity ordered"
+          - name: total_amount
+            description: "Total order amount"
+
+      - name: customers
+        description: "Customer data"
+        columns:
+          - name: customer_id
+            description: "Unique identifier for customers"
+            tests:
+              - unique
+              - not_null
+          - name: customer_name
+            description: "Customer name"
+          - name: customer_email
+            description: "Customer email"
+          - name: customer_created_at
+            description: "Customer creation timestamp" 
