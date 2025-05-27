@@ -14,14 +14,6 @@ logs/
 compiled/
 run/
 
-# dbtドキュメント生成ファイル
-docs/
-site/
-
-# dbtプロファイル（機密情報を含む可能性）
-profiles.yml
-.dbt_profiles/
-
 # dbtテスト結果
 test_results/
 .dbt_test_results/

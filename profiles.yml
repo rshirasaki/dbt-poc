@@ -1,0 +1,14 @@
+# ~/.dbt/profiles.yml
+ecommerce:
+  target: default
+  outputs:
+    # テナント対応（動的データベース切り替え）
+    default:
+      type: postgres
+      host: postgres
+      port: 5432
+      user: dbt_user
+      password: dbt_password
+      dbname: "{{ env_var('TENANT_NAME', 'tenant_a') }}_db"
+      schema: public
+      threads: 4
